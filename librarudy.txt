@@ -1,0 +1,12 @@
+librarudy
+
+needs book (obv)
+
+books have title, author, publishDate, genre
+publishDate: dd/mm/yyyy use split to get each
+
+books can be borrowed, returned, bookmarked
+
+library functions: borrowBook, returnBook, bookAvailableCheck, howManyAvailableCheck, borrowLimit = totalCopies * 50%, returnByWhen (how many days left)
+
+library card (validity)
