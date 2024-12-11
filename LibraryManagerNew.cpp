@@ -1,13 +1,16 @@
 // todo: map arrow keys to ctrl + something with pinky perhaps and remove vim prolly -> No option for this
 // todo: sort objects in array using member value -> can do now
 
+// todo: add user levels ie admins for book control (entry, changeDetails, ...), consumers for basic stuff (borrow, return, preview, ...)
+// todo: implement vectors instead of controlling with pointers -> much cleaner, more readable, just better
+
 /*
     normal
     * important
     ! alert
     ? queries
     todo tasks
- */
+*/
 
 #include <iostream>
 #include <conio.h> // _kbhit() and _getch()
@@ -16,9 +19,11 @@
 #include <windows.h>
 using namespace std;
 
-int position = 0;
+// globals
 bool closeGUI = false;
-int k = 0;
+int position = 0;       // for cursor in gui
+int firstBookIndex = 0; // starting index for loops
+int k = 0;              // for book id's
 
 class Book {
     int id = k;
@@ -43,11 +48,12 @@ class Book {
         }
 
         void preview() {
-            cout << "Book Name: " << name
-                 << "\nAuthor: " << author
-                 << "\nPublish Date: " << publishDate
-                 << "\nGenre: " << genre
-                 << "\nAvailable Copies: " << availableCopies;
+            cout << "ID: " << id 
+                << "\nBook Name: " << name
+                << "\nAuthor: " << author
+                << "\nPublish Date: " << publishDate
+                << "\nGenre: " << genre
+                << "\nAvailable Copies: " << availableCopies;
         }
 
         void changeDetails() {
@@ -64,8 +70,13 @@ class Book {
         }
 
         void borrow() {
-            availableCopies--;
-            cout << name << " borrowed\n";
+            if (availableCopies == 0) {
+                cout << "No copies left\n";
+            }
+            else {
+                availableCopies--;
+                cout << name << " borrowed\n";
+            }
         }
 
         void rEturn() {
@@ -73,18 +84,34 @@ class Book {
             cout << name << " returned\n";
         }
 
-        ~Book() {   // todo: call only when removeBook() or end of program
-            cout << name << " deleted from records\n";
-        }
+        ~Book() {                                       // todo: call only when removeBook() or end of program: done i think: no, not done apparently
+            cout << name << " deleted from records\n";  // ! occurs multiple times, cause -> copying from b to temp to b, deleting b for transfer in func createBook
+        }                                               // * fix: no user defined destructor, delete from memory, delete location / pointer
 
         friend void listBooks(Book b[]);
         friend int whichBook();
 };
 
-Book *b;
 
+Book *b;    // global class for unending scope, pointer for object array
+int capacity = 0;   // capacity of array of books
+
+// real functions
 void createBook() {
-    b = new Book;
+    if (k == capacity) {
+        capacity = (capacity == 0) ? 1 : k * 2;
+
+        Book *temp = new Book[capacity];
+
+        for (int i = firstBookIndex; i < k; i++) {
+            temp[i] = b[i];
+        }
+
+        delete[] b;
+
+        b = temp;
+    }
+
     b[k++].entry();
 }
 
@@ -93,28 +120,39 @@ void removeBook(int id) {
 }
 
 void listBooks(Book b[]) {
-    cout << "All Recorded Books:\n";
+    if (k == 0)
+        cout << "No books exist in the records.\n";
+    
+    else {
+        cout << "All Recorded Books:\n";
 
-    for (int i = 0; i < k; i++) {
-        cout << i+1 << ") " << b[i].name << "\n";
+        for (int i = firstBookIndex; i < k; i++) {
+            cout << i+1 << ") " << b[i].name << "\n";
+        }
     }
 }
 
+
+// it is what it is
 void sayIt() {
     cout << "Hocus Pocus Focus Amogus\n>>> ";
 }
 
 
+// function extensions
 int whichBook() {
     string thisBook;
 
     cout << "Operate on which book? ";
     cin >> thisBook;
 
-    for (int i = 0; i < k; i++) {
+    for (int i = firstBookIndex; i < k; i++) {
         if (thisBook == b[i].name)
             return b[i].id;
     }
+
+    cout << "Such a book does not exist in the records.\n";
+    return -1;
 }
 
 void operations(int choice) {
@@ -122,36 +160,51 @@ void operations(int choice) {
 
     switch (choice) {
         case 0:
+            listBooks(b);
+            break;
+        
+        case 1:
             createBook();
             break;
 
-        case 1:
+        case 2:
             id = whichBook();
+            if (id == -1)
+                break;
+            
             b[id].changeDetails();
             break;
         
-        case 2:
-            whichBook();
-            removeBook(id);
-            break;
-
         case 3:
-            whichBook();
+            id = whichBook();
+            if (id == -1)
+                break;
+            
             b[id].copiesAvailable();
             break;
         
         case 4:
-            whichBook();
+            id = whichBook();
+            if (id == -1)
+                break;
+            
             b[id].borrow();
             break;
         
         case 5:
-            whichBook();
+            id = whichBook();
+            if (id == -1)
+                break;
+            
             b[id].rEturn();
             break;
         
         case 6:
-            listBooks(b);
+            id = whichBook();
+            if (id == -1)
+                break;
+            
+            removeBook(id);
             break;
         
         case 7:
@@ -164,27 +217,29 @@ void operations(int choice) {
     
 }
 
+// cli
 void librarySystemCLI() {
     cout << "Do what?\n"
-        << "\tEnter a book [1]\n"
-        << "\tChange a book's details [2]\n"
-        << "\tRemove a book [3]\n"
+        << "\tList all books [1]\n" // todo: integrate to other interfaces: done, reorder all operations: done, add preview method
+        << "\tEnter a book [2]\n"
+        << "\tChange a book's details [3]\n"
         << "\tCheck if copies are available [4]\n"
         << "\tBorrow a book [5]\n"
         << "\tReturn a book [6]\n"
-        << "\tList all books [7]\n" // todo: integrate to other interfaces, reorder all operations
+        << "\tRemove a book [7]\n"
         << "\tSay the magic words [8]\n>>> ";
-
-    int action;    
+    
+    int action;
     cin >> action;
     
     operations(action - 1);    // (-1) cause cases start from 0
 }
 
 
+// gui
 void printGUI(string prompts[]) {
-    for (int i = 0; i < 7; i++) {
-        if (position % 7 == i)
+    for (int i = 0; i < 8; i++) {
+        if (position % 8 == i)
             cout << ">>> ";
             
         cout << prompts[i];
@@ -204,7 +259,7 @@ void pointGUI() {
             
             case 'h':
                 cout << "\n\n---> ";
-                operations(position % 7);
+                operations(position % 8);
                 getch();
                 break;
 
@@ -216,12 +271,13 @@ void pointGUI() {
 
 void librarySystemGUI() {
     string prompts[] = {
+        "List all books\n",
         "Enter a book\n",
         "Change a book's details\n",
-        "Remove a book\n",
         "Check if copies are available\n",
         "Borrow a book\n",
         "Return a book\n",
+        "Remove a book\n",
         "Say the magic words\n"
     };
 
@@ -241,6 +297,7 @@ void librarySystemGUI() {
 }
 
 
+// main.
 int main() {
     char repeat = 'Y';
 
