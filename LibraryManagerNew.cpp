@@ -1,7 +1,5 @@
-// * shift alt a ---> block comment
-// todo: push to github
-// todo: map arrow keys to ctrl + something with pinky perhaps and remove vim prolly
-// todo: sort objects in array using member value
+// todo: map arrow keys to ctrl + something with pinky perhaps and remove vim prolly -> No option for this
+// todo: sort objects in array using member value -> can do now
 
 /*
     normal
@@ -20,11 +18,13 @@ using namespace std;
 
 int position = 0;
 bool closeGUI = false;
+int k = 0;
 
 class Book {
+    int id = k;
     string name;
     string author;
-    string publishDate;
+    string publishDate; // split to dd/mm/yyyy
     string genre;
     int availableCopies;
 
@@ -76,54 +76,90 @@ class Book {
         ~Book() {   // todo: call only when removeBook() or end of program
             cout << name << " deleted from records\n";
         }
+
+        friend void listBooks(Book b[]);
+        friend int whichBook();
 };
 
+Book *b;
+
 void createBook() {
-    static Book b;
-    b.entry();
+    b = new Book;
+    b[k++].entry();
 }
 
-void removeBook(Book &b) {
-    b.~Book();
+void removeBook(int id) {
+    b[id].~Book();
+}
+
+void listBooks(Book b[]) {
+    cout << "All Recorded Books:\n";
+
+    for (int i = 0; i < k; i++) {
+        cout << i+1 << ") " << b[i].name << "\n";
+    }
 }
 
 void sayIt() {
-    cout << "Hocus Pocus Amogus\n>>> ";
+    cout << "Hocus Pocus Focus Amogus\n>>> ";
 }
 
 
-void options(int choice) {
+int whichBook() {
+    string thisBook;
+
+    cout << "Operate on which book? ";
+    cin >> thisBook;
+
+    for (int i = 0; i < k; i++) {
+        if (thisBook == b[i].name)
+            return b[i].id;
+    }
+}
+
+void operations(int choice) {
+    int id;
+
     switch (choice) {
         case 0:
             createBook();
             break;
 
         case 1:
-            changeDetails();
+            id = whichBook();
+            b[id].changeDetails();
             break;
         
         case 2:
-            removeBook();
+            whichBook();
+            removeBook(id);
             break;
 
         case 3:
-            copiesAvailable();
+            whichBook();
+            b[id].copiesAvailable();
             break;
         
         case 4:
-            borrow();
+            whichBook();
+            b[id].borrow();
             break;
         
         case 5:
-            rEturn();
+            whichBook();
+            b[id].rEturn();
             break;
         
         case 6:
+            listBooks(b);
+            break;
+        
+        case 7:
             sayIt();
             break;
 
         default:
-            cout << "Something very wrong.\n";
+            cout << "Something be very wrong.\n";
     }
     
 }
@@ -136,12 +172,13 @@ void librarySystemCLI() {
         << "\tCheck if copies are available [4]\n"
         << "\tBorrow a book [5]\n"
         << "\tReturn a book [6]\n"
-        << "\tSay the magic words [7]\n>>> ";
-    
+        << "\tList all books [7]\n" // todo: integrate to other interfaces, reorder all operations
+        << "\tSay the magic words [8]\n>>> ";
+
     int action;    
     cin >> action;
     
-    options(action - 1);    // * cause cases start from 0
+    operations(action - 1);    // (-1) cause cases start from 0
 }
 
 
@@ -167,7 +204,7 @@ void pointGUI() {
             
             case 'h':
                 cout << "\n\n---> ";
-                options(position % 7);
+                operations(position % 7);
                 getch();
                 break;
 
@@ -187,8 +224,9 @@ void librarySystemGUI() {
         "Return a book\n",
         "Say the magic words\n"
     };
+
     closeGUI = false;
-    
+
     while (!closeGUI) {
         system("cls");
 
@@ -227,5 +265,5 @@ int main() {
         cout << endl;
     }
 
-    cout << "\nLibrary Time Biatch";
+    cout << "\nLibrary Closed";
 }
