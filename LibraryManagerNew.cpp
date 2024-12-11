@@ -3,6 +3,7 @@
 
 // todo: add user levels ie admins for book control (entry, changeDetails, ...), consumers for basic stuff (borrow, return, preview, ...)
 // todo: implement vectors instead of controlling with pointers -> much cleaner, more readable, just better
+// todo: format line changes
 
 /*
     normal
@@ -53,12 +54,13 @@ class Book {
                 << "\nAuthor: " << author
                 << "\nPublish Date: " << publishDate
                 << "\nGenre: " << genre
-                << "\nAvailable Copies: " << availableCopies;
+                << "\nAvailable Copies: " << availableCopies
+                << endl;
         }
 
         void changeDetails() {
             entry();
-            cout << "deets changed\n";
+            cout << "Details updated.\n";
         }
 
         void copiesAvailable() {
@@ -84,12 +86,13 @@ class Book {
             cout << name << " returned\n";
         }
 
-        ~Book() {                                       // todo: call only when removeBook() or end of program: done i think: no, not done apparently
-            cout << name << " deleted from records\n";  // ! occurs multiple times, cause -> copying from b to temp to b, deleting b for transfer in func createBook
-        }                                               // * fix: no user defined destructor, delete from memory, delete location / pointer
+        // ~Book() {                                       // todo: call only when removeBook() or end of program: done i think: no, not done apparently
+        //     cout << name << " deleted from records\n";  // ! occurs multiple times, cause -> copying from b to temp to b, deleting b for transfer in func createBook
+        // }                                               // * fix: no user defined destructor, delete from memory, delete location / pointer
 
         friend void listBooks(Book b[]);
         friend int whichBook();
+        friend void removeBook(int id);
 };
 
 
@@ -116,7 +119,16 @@ void createBook() {
 }
 
 void removeBook(int id) {
-    b[id].~Book();
+    Book temp;
+    string name = b[id].name;
+
+    temp = b[id];
+    b[id] = b[k-1];     // swap index of last element with that of element to be removed
+    b[k-1] = temp;
+
+    b[k--].~Book();
+
+    cout << name << " removed from records.\n";
 }
 
 void listBooks(Book b[]) {
@@ -135,7 +147,7 @@ void listBooks(Book b[]) {
 
 // it is what it is
 void sayIt() {
-    cout << "Hocus Pocus Focus Amogus\n>>> ";
+    cout << "Hocus Pocus Focus Amogus\n";
 }
 
 
@@ -164,10 +176,18 @@ void operations(int choice) {
             break;
         
         case 1:
-            createBook();
+            id = whichBook();
+            if (id == -1)
+                break;
+            
+            b[id].preview();
             break;
 
         case 2:
+            createBook();
+            break;
+
+        case 3:
             id = whichBook();
             if (id == -1)
                 break;
@@ -175,7 +195,7 @@ void operations(int choice) {
             b[id].changeDetails();
             break;
         
-        case 3:
+        case 4:
             id = whichBook();
             if (id == -1)
                 break;
@@ -183,7 +203,7 @@ void operations(int choice) {
             b[id].copiesAvailable();
             break;
         
-        case 4:
+        case 5:
             id = whichBook();
             if (id == -1)
                 break;
@@ -191,7 +211,7 @@ void operations(int choice) {
             b[id].borrow();
             break;
         
-        case 5:
+        case 6:
             id = whichBook();
             if (id == -1)
                 break;
@@ -199,7 +219,7 @@ void operations(int choice) {
             b[id].rEturn();
             break;
         
-        case 6:
+        case 7:
             id = whichBook();
             if (id == -1)
                 break;
@@ -207,7 +227,7 @@ void operations(int choice) {
             removeBook(id);
             break;
         
-        case 7:
+        case 8:
             sayIt();
             break;
 
@@ -221,13 +241,14 @@ void operations(int choice) {
 void librarySystemCLI() {
     cout << "Do what?\n"
         << "\tList all books [1]\n" // todo: integrate to other interfaces: done, reorder all operations: done, add preview method
-        << "\tEnter a book [2]\n"
-        << "\tChange a book's details [3]\n"
-        << "\tCheck if copies are available [4]\n"
-        << "\tBorrow a book [5]\n"
-        << "\tReturn a book [6]\n"
-        << "\tRemove a book [7]\n"
-        << "\tSay the magic words [8]\n>>> ";
+        << "\tPreview a book [2]\n"
+        << "\tEnter a book [3]\n"
+        << "\tChange a book's details [4]\n"
+        << "\tCheck if copies are available [5]\n"
+        << "\tBorrow a book [6]\n"
+        << "\tReturn a book [7]\n"
+        << "\tRemove a book [8]\n"
+        << "\tSay the magic words [9]\n>>> ";
     
     int action;
     cin >> action;
@@ -238,8 +259,8 @@ void librarySystemCLI() {
 
 // gui
 void printGUI(string prompts[]) {
-    for (int i = 0; i < 8; i++) {
-        if (position % 8 == i)
+    for (int i = 0; i < 9; i++) {
+        if (position % 9 == i)
             cout << ">>> ";
             
         cout << prompts[i];
@@ -259,7 +280,7 @@ void pointGUI() {
             
             case 'h':
                 cout << "\n\n---> ";
-                operations(position % 8);
+                operations(position % 9);
                 getch();
                 break;
 
@@ -272,6 +293,7 @@ void pointGUI() {
 void librarySystemGUI() {
     string prompts[] = {
         "List all books\n",
+        "Preview a book\n",
         "Enter a book\n",
         "Change a book's details\n",
         "Check if copies are available\n",
@@ -321,6 +343,8 @@ int main() {
 
         cout << endl;
     }
+
+    delete[] b;
 
     cout << "\nLibrary Closed";
 }
