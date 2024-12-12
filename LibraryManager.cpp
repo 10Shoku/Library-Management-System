@@ -1,12 +1,7 @@
-// todo: map arrow keys to ctrl + something with pinky perhaps and remove vim prolly -> No option for this
-// todo: sort objects in array using member value -> can do now
-
 // todo: add user levels ie admins for book control (entry, changeDetails, ...), consumers for basic stuff (borrow, return, preview, ...)
-// todo: implement vectors instead of controlling with pointers -> much cleaner, more readable, just better
-// todo: format line changes
-// todo: store and get from files
-
 // todo: search method -> changeDeets, borrow, return, checkCopies, preview: search by name, author, id, genre
+// todo: store and get from files
+// todo: format line changes
 
 /*
     normal
@@ -25,31 +20,9 @@
 using namespace std;
 
 
-// // vector tests
-// void vecShow(vector<int> vec) {
-//     for (auto i : vec) {
-//         cout << i << " ";
-//     }
-//     cout << endl;
-// }
-
-// int main() {
-//     vector<int> vec{2, 4, 5, 3, 2};
-//     vecShow(vec);
-
-//     vec.push_back(24);
-//     vecShow(vec);
-
-//     vec.erase(vec.begin() + 2);
-//     vecShow(vec);
-
-//     vec.empty();
-// }
-
 // globals
 bool closeGUI = false;
 int position = 0;       // for cursor in gui
-int firstBookIndex = 0; // starting index for loops
 int count = 0;              // for book id's
 
 class Book {
@@ -122,29 +95,10 @@ class Book {
 };
 
 
-// Book *b;    // global class for unending scope, pointer for object array
-// int capacity = 0;   // capacity of array of books
-
 vector<Book> b;
 
 // real functions
-void createBook() {
-    // if (count == capacity) {
-    //     capacity = (capacity == 0) ? 1 : count * 2;
-
-    //     Book *temp = new Book[capacity];
-
-    //     for (int i = firstBookIndex; i < count; i++) {
-    //         temp[i] = b[i];
-    //     }
-
-    //     delete[] b;
-
-    //     b = temp;
-    // }
-
-    // b[count++].entry();
-    
+void createBook() {    
     Book temp;
     temp.entry();
     
@@ -154,17 +108,9 @@ void createBook() {
 }
 
 void removeBook(int id) {
-    // Book temp;
     string name = b[id].name;
 
-    // temp = b[id];
-    // b[id] = b[count-1];     // swap index of last element with that of element to be removed
-    // b[count-1] = temp;
-
-    // b[count--].~Book();
-
     b.erase(b.begin() + id);
-
     count--;
 
     cout << name << " removed from records.\n";
@@ -177,7 +123,7 @@ void listBooks() {
     else {
         cout << "All Recorded Books:\n";
 
-        for (int i = firstBookIndex; i < b.size(); i++) {
+        for (int i = 0; i < b.size(); i++) {
             cout << i+1 << ") " << b[i].name << "\n";
         }
     }
@@ -197,7 +143,7 @@ int whichBook() {
     cout << "Operate on which book? ";
     cin >> thisBook;
 
-    for (int i = firstBookIndex; i < b.size(); i++) {
+    for (int i = 0; i < b.size(); i++) {
         if (thisBook == b[i].name)
             return b[i].id;
     }
@@ -276,10 +222,11 @@ void operations(int choice) {
     
 }
 
+
 // cli
 void librarySystemCLI() {
     cout << "Do what?\n"
-        << "\tList all books [1]\n" // todo: integrate to other interfaces: done, reorder all operations: done, add preview method
+        << "\tList all books [1]\n"
         << "\tPreview a book [2]\n"
         << "\tEnter a book [3]\n"
         << "\tChange a book's details [4]\n"
@@ -378,8 +325,6 @@ int main() {
 
         cout << endl;
     }
-
-    // delete[] b;
 
     cout << "----------------\n Library Closed";
 }
