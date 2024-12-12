@@ -1,5 +1,6 @@
 // todo: add user levels ie admins for book control (entry, changeDetails, ...), consumers for basic stuff (borrow, return, preview, ...)
 // todo: search method -> changeDeets, borrow, return, checkCopies, preview: search by name, author, id, genre
+// todo: in func pointGUI, use arrow keys and enter as inputs
 // todo: store and get from files
 // todo: format line changes
 
@@ -12,7 +13,7 @@
 */
 
 #include <iostream>
-#include <conio.h> // _kbhit() and _getch()
+#include <conio.h>      // _kbhit() and _getch()
 #include <string.h>
 #include <vector>
 #include <fstream>
@@ -21,15 +22,16 @@ using namespace std;
 
 
 // globals
+int count = 0;          // for book id's
+short cursor = 0;       // for cursor in gui
+short nPrompts = 9;     // number of prompts
 bool closeGUI = false;
-int position = 0;       // for cursor in gui
-int count = 0;              // for book id's
 
 class Book {
     int id = count;
     string name;
     string author;
-    string publishDate; // split to dd/mm/yyyy
+    string publishDate;     // todo: split to dd/mm/yyyy
     string genre;
     int availableCopies;
 
@@ -48,7 +50,7 @@ class Book {
         }
 
         void preview() {
-            cout << "ID: " << id 
+            cout << "ID: " << id
                 << "\nBook Name: " << name
                 << "\nAuthor: " << author
                 << "\nPublish Date: " << publishDate
@@ -85,32 +87,29 @@ class Book {
             cout << name << " returned\n";
         }
 
-        // ~Book() {                                       // todo: call only when removeBook() or end of program: done i think: no, not done apparently
-        //     cout << name << " deleted from records\n";  // ! occurs multiple times, cause -> copying from b to temp to b, deleting b for transfer in func createBook
-        // }                                               // * fix: no user defined destructor, delete from memory, delete location / pointer
-
         friend void listBooks();
         friend int whichBook();
         friend void removeBook(int id);
 };
 
-
 vector<Book> b;
 
+
 // real functions
-void createBook() {    
+void createBook() {
     Book temp;
     temp.entry();
-    
+
     b.push_back(temp);
 
     count++;
 }
 
-void removeBook(int id) {
-    string name = b[id].name;
+void removeBook(int iD) {
+    string name = b[iD].name;
+    int i = b[iD].id;
 
-    b.erase(b.begin() + id);
+    b.erase(b.begin() + i);
     count--;
 
     cout << name << " removed from records.\n";
@@ -119,7 +118,7 @@ void removeBook(int id) {
 void listBooks() {
     if (b.empty())
         cout << "No books exist in the records.\n";
-    
+
     else {
         cout << "All Recorded Books:\n";
 
@@ -152,19 +151,19 @@ int whichBook() {
     return -1;
 }
 
-void operations(int choice) {
+void operations(short choice) {
     int id;
 
     switch (choice) {
         case 0:
             listBooks();
             break;
-        
+
         case 1:
             id = whichBook();
             if (id == -1)
                 break;
-            
+
             b[id].preview();
             break;
 
@@ -176,50 +175,49 @@ void operations(int choice) {
             id = whichBook();
             if (id == -1)
                 break;
-            
+
             b[id].changeDetails();
             break;
-        
+
         case 4:
             id = whichBook();
             if (id == -1)
                 break;
-            
+
             b[id].copiesAvailable();
             break;
-        
+
         case 5:
             id = whichBook();
             if (id == -1)
                 break;
-            
+
             b[id].borrow();
             break;
-        
+
         case 6:
             id = whichBook();
             if (id == -1)
                 break;
-            
+
             b[id].rEturn();
             break;
-        
+
         case 7:
             id = whichBook();
             if (id == -1)
                 break;
-            
+
             removeBook(id);
             break;
-        
+
         case 8:
             sayIt();
             break;
 
         default:
-            cout << "Something be very wrong.\n";
+            cout << "Invalid Choice\n";
     }
-    
 }
 
 
@@ -235,20 +233,24 @@ void librarySystemCLI() {
         << "\tReturn a book [7]\n"
         << "\tRemove a book [8]\n"
         << "\tSay the magic words [9]\n>>> ";
-    
-    int action;
-    cin >> action;
-    
-    operations(action - 1);    // (-1) cause cases start from 0
-}
 
+        short action;
+        if (cin >> action)
+            operations((action) - 1);
+        
+        else {
+            cout << "Only Numbers!\n";      // handling char input error
+            cin.clear();
+            cin.ignore(100, '\n');
+        }
+}
 
 // gui
 void printGUI(string prompts[]) {
-    for (int i = 0; i < 9; i++) {
-        if (position % 9 == i)
+    for (int i = 0; i < nPrompts; i++) {
+        if (cursor == i)
             cout << ">>> ";
-            
+
         cout << prompts[i];
     }
 }
@@ -257,16 +259,20 @@ void pointGUI() {
     if (_kbhit()) {
         switch (_getch()) {
             case 'p':
-                position--;
+                if (cursor != 0)
+                    cursor--;
+
                 break;
-            
+
             case 'u':
-                position++;
+                if (cursor != nPrompts - 1)
+                    cursor++;
+
                 break;
-            
+
             case 'h':
                 cout << "\n\n---> ";
-                operations(position % 9);
+                operations(cursor % nPrompts);
                 getch();
                 break;
 
@@ -300,7 +306,7 @@ void librarySystemGUI() {
         printGUI(prompts);
         pointGUI();
 
-        Sleep(100);
+        Sleep(150);
     }
 }
 
@@ -316,15 +322,15 @@ int main() {
 
         if (choice == 'C' || choice == 'c')
             librarySystemCLI();
-
+        
         else if (choice == 'G' || choice == 'g')
             librarySystemGUI();
 
         else
             break;
-
+        
         cout << endl;
     }
 
-    cout << "----------------\n Library Closed";
+    cout << "\n----------------\n Library Closed";
 }
