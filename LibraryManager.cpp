@@ -4,6 +4,9 @@
 // todo: add user levels ie admins for book control (entry, changeDetails, ...), consumers for basic stuff (borrow, return, preview, ...)
 // todo: implement vectors instead of controlling with pointers -> much cleaner, more readable, just better
 // todo: format line changes
+// todo: store and get from files
+
+// todo: search method -> changeDeets, borrow, return, checkCopies, preview: search by name, author, id, genre
 
 /*
     normal
@@ -15,19 +18,42 @@
 
 #include <iostream>
 #include <conio.h> // _kbhit() and _getch()
+#include <string.h>
 #include <vector>
 #include <fstream>
 #include <windows.h>
 using namespace std;
 
+
+// // vector tests
+// void vecShow(vector<int> vec) {
+//     for (auto i : vec) {
+//         cout << i << " ";
+//     }
+//     cout << endl;
+// }
+
+// int main() {
+//     vector<int> vec{2, 4, 5, 3, 2};
+//     vecShow(vec);
+
+//     vec.push_back(24);
+//     vecShow(vec);
+
+//     vec.erase(vec.begin() + 2);
+//     vecShow(vec);
+
+//     vec.empty();
+// }
+
 // globals
 bool closeGUI = false;
 int position = 0;       // for cursor in gui
 int firstBookIndex = 0; // starting index for loops
-int k = 0;              // for book id's
+int count = 0;              // for book id's
 
 class Book {
-    int id = k;
+    int id = count;
     string name;
     string author;
     string publishDate; // split to dd/mm/yyyy
@@ -90,55 +116,68 @@ class Book {
         //     cout << name << " deleted from records\n";  // ! occurs multiple times, cause -> copying from b to temp to b, deleting b for transfer in func createBook
         // }                                               // * fix: no user defined destructor, delete from memory, delete location / pointer
 
-        friend void listBooks(Book b[]);
+        friend void listBooks();
         friend int whichBook();
         friend void removeBook(int id);
 };
 
 
-Book *b;    // global class for unending scope, pointer for object array
-int capacity = 0;   // capacity of array of books
+// Book *b;    // global class for unending scope, pointer for object array
+// int capacity = 0;   // capacity of array of books
+
+vector<Book> b;
 
 // real functions
 void createBook() {
-    if (k == capacity) {
-        capacity = (capacity == 0) ? 1 : k * 2;
+    // if (count == capacity) {
+    //     capacity = (capacity == 0) ? 1 : count * 2;
 
-        Book *temp = new Book[capacity];
+    //     Book *temp = new Book[capacity];
 
-        for (int i = firstBookIndex; i < k; i++) {
-            temp[i] = b[i];
-        }
+    //     for (int i = firstBookIndex; i < count; i++) {
+    //         temp[i] = b[i];
+    //     }
 
-        delete[] b;
+    //     delete[] b;
 
-        b = temp;
-    }
+    //     b = temp;
+    // }
 
-    b[k++].entry();
+    // b[count++].entry();
+    
+    Book temp;
+    temp.entry();
+    
+    b.push_back(temp);
+
+    count++;
 }
 
 void removeBook(int id) {
-    Book temp;
+    // Book temp;
     string name = b[id].name;
 
-    temp = b[id];
-    b[id] = b[k-1];     // swap index of last element with that of element to be removed
-    b[k-1] = temp;
+    // temp = b[id];
+    // b[id] = b[count-1];     // swap index of last element with that of element to be removed
+    // b[count-1] = temp;
 
-    b[k--].~Book();
+    // b[count--].~Book();
+
+    b.erase(b.begin() + id);
+
+    count--;
 
     cout << name << " removed from records.\n";
 }
 
-void listBooks(Book b[]) {
-    if (k == 0)
+void listBooks() {
+    if (b.empty())
         cout << "No books exist in the records.\n";
     
     else {
         cout << "All Recorded Books:\n";
 
-        for (int i = firstBookIndex; i < k; i++) {
+        for (int i = firstBookIndex; i < b.size(); i++) {
             cout << i+1 << ") " << b[i].name << "\n";
         }
     }
@@ -158,7 +197,7 @@ int whichBook() {
     cout << "Operate on which book? ";
     cin >> thisBook;
 
-    for (int i = firstBookIndex; i < k; i++) {
+    for (int i = firstBookIndex; i < b.size(); i++) {
         if (thisBook == b[i].name)
             return b[i].id;
     }
@@ -172,7 +211,7 @@ void operations(int choice) {
 
     switch (choice) {
         case 0:
-            listBooks(b);
+            listBooks();
             break;
         
         case 1:
@@ -321,30 +360,26 @@ void librarySystemGUI() {
 
 // main.
 int main() {
-    char repeat = 'Y';
 
-    while (repeat == 'Y'){
+    while (true) {
         char choice;
 
-        cout << "CLI or GUI? (C/G)\n>>> ";
+        cout << "CLI / GUI / Exit?\n(C / G / Any other key)\n>>> ";
         cin >> choice;
 
-        if (choice == 'C')
+        if (choice == 'C' || choice == 'c')
             librarySystemCLI();
 
-        else if (choice == 'G')
+        else if (choice == 'G' || choice == 'g')
             librarySystemGUI();
-        
-        else
-            cout << "Well, what do you want then, bruh?\n";
 
-        cout << "\nContinue? (Y/N)\n>>> ";
-        cin >> repeat;
+        else
+            break;
 
         cout << endl;
     }
 
-    delete[] b;
+    // delete[] b;
 
-    cout << "\nLibrary Closed";
+    cout << "----------------\n Library Closed";
 }
