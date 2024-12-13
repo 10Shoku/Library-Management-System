@@ -10,6 +10,11 @@
 // ! Member values of d, e move down 1 index but they themselves don't
 // ! This causes: d -> values of e, e -> empty values
 
+// ! a b c d e
+// ! a b d e
+// !
+// ! objects are shifting, but values are not
+
 /*
     normal
     * important
@@ -46,6 +51,19 @@ class Book {
             cout << "Book initialized\n";
         };
 
+        Book(const Book& other) : id(other.id), name(other.name), author(other.author), publishDate(other.publishDate), genre(other.genre), availableCopies(other.availableCopies) {}   // * test
+
+        Book operator=(const Book& other) {     // * test
+            id = other.id;
+            name = other.name;
+            author = other.author;
+            publishDate = other.publishDate;
+            genre = other.genre;
+            availableCopies = other.availableCopies;
+
+            return *this;
+        }
+
         void entry() {
             cout << "Book Name: ";
             cin >> name;
@@ -59,7 +77,7 @@ class Book {
             cin >> availableCopies;
         }
 
-        void preview() {
+        void preview() const {
             cout << "ID: " << id
                 << "\nBook Name: " << name
                 << "\nAuthor: " << author
@@ -109,7 +127,7 @@ vector<Book> b;
 void createBook() {
     Book temp;
     temp.entry();
-
+    
     b.push_back(temp);
 
     count++;
@@ -119,7 +137,8 @@ void removeBook(int iD) {
     string name = b[iD].name;
     int i = b[iD].id;
 
-    b.erase(b.begin() + i);
+    b.erase(b.begin() + iD);    // ! ded
+
     count--;
 
     cout << name << " removed from records.\n";
@@ -153,9 +172,13 @@ int whichBook() {
     cin >> thisBook;
 
     for (Book temp : b) {
-        if (temp.name == thisBook)
+        if (temp.name == thisBook) {
+            cout << "ID: " << temp.id << endl;  // test
             return temp.id;
+        }
     }
+
+    
 
     // for (int i = 0; i < b.size(); i++) {    // todo: use ranged for loop, iterative is iterating id's that have been deleted
     //     if (thisBook == b[i].name)
