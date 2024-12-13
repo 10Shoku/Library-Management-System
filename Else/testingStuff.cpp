@@ -21,4 +21,12 @@ int main() {
     cout << (char)_getch();
 
     // cout << temp << endl << (char)_getch();
+
+    // testing codeium
+
+    string flowers[7] = {"Rose", "Tulip", "Lily", "Daisy", "Sunflower", "Daffodil", "Orchid"};
+
+    for (int i = 0; i < 7; i++) {
+        cout << flowers[i] << endl;
+    }
 }

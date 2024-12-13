@@ -4,6 +4,12 @@
 // todo: store and get from files
 // todo: format line changes
 
+// ! FIX:
+// ! Enter book obj's a, b, c, d, e
+// ! Delete c
+// ! Member values of d, e move down 1 index but they themselves don't
+// ! This causes: d -> values of e, e -> empty values
+
 /*
     normal
     * important
@@ -36,6 +42,10 @@ class Book {
     int availableCopies;
 
     public:
+        Book(int i = 0, string n = "", string a = "", string p = "", string g = "", int aC = 0) : id(i), name(n), author(a), publishDate(p), genre(g), availableCopies(aC) {
+            cout << "Book initialized\n";
+        };
+
         void entry() {
             cout << "Book Name: ";
             cin >> name;
@@ -142,10 +152,15 @@ int whichBook() {
     cout << "Operate on which book? ";
     cin >> thisBook;
 
-    for (int i = 0; i < b.size(); i++) {
-        if (thisBook == b[i].name)
-            return b[i].id;
+    for (Book temp : b) {
+        if (temp.name == thisBook)
+            return temp.id;
     }
+
+    // for (int i = 0; i < b.size(); i++) {    // todo: use ranged for loop, iterative is iterating id's that have been deleted
+    //     if (thisBook == b[i].name)
+    //         return b[i].id;
+    // }
 
     cout << "Such a book does not exist in the records.\n";
     return -1;
@@ -313,6 +328,20 @@ void librarySystemGUI() {
 
 // main.
 int main() {
+    Book t1(0, "a", "a", "a", "a", 1);
+    Book t2(1, "b", "b", "b", "b", 2);
+    Book t3(2, "c", "c", "c", "c", 3);
+    Book t4(3, "d", "d", "d", "d", 4);
+    Book t5(4, "e", "e", "e", "e", 5);
+
+    b.push_back(t1);
+    b.push_back(t2);
+    b.push_back(t3);
+    b.push_back(t4);
+    b.push_back(t5);
+
+    cout << endl;
+    
 
     while (true) {
         char choice;
