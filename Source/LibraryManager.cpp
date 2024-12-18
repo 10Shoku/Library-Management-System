@@ -29,16 +29,15 @@
 #include <vector>
 #include <fstream>
 #include <windows.h>
-#include "Book.h"
-#include "BookFuncs.h"
+#include "../Headers/Book.h"           // todo: try to add a different small header file to the program
 using namespace std;
 
 
 // globals
 // int count = 0;          // for book id's
-short cursor = 0;       // for cursor in gui
-short nPrompts = 9;     // number of prompts
-bool closeGUI = false;
+// short cursor = 0;       // for cursor in gui
+// short nPrompts = 9;     // number of prompts
+// bool closeGUI = false;
 
 // class Book {
 //     protected:
@@ -123,49 +122,50 @@ bool closeGUI = false;
 //         friend void removeBook(int id);
 // };
 
-// class Staff : public Book {
-//     public:
-//         void entry() {
-//             cout << "Book Name: ";
-//             cin >> name;
-//             cout << "Author: ";
-//             cin >> author;
-//             cout << "Publish Date: ";
-//             cin >> publishDate;
-//             cout << "Genre: ";
-//             cin >> genre;
-//             cout << "Available Copies: ";
-//             cin >> availableCopies;
-//         }
 
-//         void changeDetails() {
-//             entry();
-//             cout << "Details updated.\n";
-//         }
+class Staff : public Book {
+    public:
+        void entry() {
+            cout << "Book Name: ";
+            cin >> name;
+            cout << "Author: ";
+            cin >> author;
+            cout << "Publish Date: ";
+            cin >> publishDate;
+            cout << "Genre: ";
+            cin >> genre;
+            cout << "Available Copies: ";
+            cin >> availableCopies;
+        }
 
-//         friend void removeBook(int id);
+        void changeDetails() {
+            entry();
+            cout << "Details updated.\n";
+        }
 
-// };
+        friend void removeBook(int id);
 
-// class User : public Book {
-//     public:
-//         void borrow() {
-//             if (availableCopies == 0) {
-//                 cout << "No copies left\n";
-//             }
-//             else {
-//                 availableCopies--;
-//                 cout << name << " borrowed\n";
-//             }
-//         }
+};
 
-//         void rEturn() {
-//             availableCopies++;
-//             cout << name << " returned\n";
-//         }
-// };
+class User : public Book {
+    public:
+        void borrow() {
+            if (availableCopies == 0) {
+                cout << "No copies left\n";
+            }
+            else {
+                availableCopies--;
+                cout << name << " borrowed\n";
+            }
+        }
 
-vector<Book> b;
+        void rEturn() {
+            availableCopies++;
+            cout << name << " returned\n";
+        }
+};
+
+// vector<Book> b;
 
 
 // // real functions
@@ -178,7 +178,7 @@ vector<Book> b;
 //     count++;
 // }
 
-// void removeBook(int iD) {
+// void removeBook(int iD) {       // ! FIX FIX FIX
 //     string name = b[iD].name;
 //     int i = b[iD].id;
 
@@ -203,10 +203,10 @@ vector<Book> b;
 // }
 
 
-// it is what it is
-void sayIt() {
-    cout << "Hocus Pocus Focus Amogus\n";
-}
+// // it is what it is
+// void sayIt() {
+//     cout << "Hocus Pocus Focus Amogus\n";
+// }
 
 
 // // function extensions
@@ -222,13 +222,6 @@ void sayIt() {
 //             return temp.id;
 //         }
 //     }
-
-    
-
-//     // for (int i = 0; i < b.size(); i++) {    // todo: use ranged for loop, iterative is iterating id's that have been deleted
-//     //     if (thisBook == b[i].name)
-//     //         return b[i].id;
-//     // }
 
 //     cout << "Such a book does not exist in the records.\n";
 //     return -1;
@@ -328,6 +321,7 @@ void sayIt() {
 //         }
 // }
 
+
 // // gui
 // void printGUI(string prompts[]) {
 //     for (int i = 0; i < nPrompts; i++) {
@@ -365,7 +359,7 @@ void sayIt() {
 //     }
 // }
 
-// void librarySystemGUI() {
+// void librarySystemGUI() {       // works with codeRunner but not with default compiler
 //     string prompts[] = {
 //         "List all books\n",
 //         "Preview a book\n",
